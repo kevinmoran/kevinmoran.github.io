@@ -1,26 +1,42 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 
-body, html {
-    height: 100%;
+#banner {
+  position:relative;
 }
 
-.header-image {
-  background-image: linear-gradient(rgba(0, 201, 252, 0.1), rgba(5, 26, 65, 0.3)), url("header.jpg");
-  height: 18%;
+#header-image,
+#header-text {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+#header-image {
+  background-image: linear-gradient(#00cafc20,  #051a4167), url("header.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  position: relative;
+  position: absolute;
+  min-height: 220px;
 }
 
-.header-text {
+#header-text {
   text-align: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   color: white;
   font-weight: 520;
+  z-index: 10;
+  pointer-events: none;
+  position: absolute;
+}
+
+#social-media-links {
+  margin: 0 auto;
+  width:20%;
+  pointer-events: auto;
+}
+#social-media-links a img {
+  margin: 0 1em 0 1em;
 }
 
 body {
@@ -30,6 +46,11 @@ body {
     line-height: 1.5;
     padding: 1em 0em 30em;
     color: #555;
+    text-align: justify;
+}
+
+#content {
+  padding-top: 220px;
 }
 
 h2,
