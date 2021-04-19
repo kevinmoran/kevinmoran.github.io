@@ -18,9 +18,9 @@ strong {
 }
 
 blockquote {
-    padding: 1em 1em;
+    padding: 0.5em 2em;
     color: #333;
-    background-color: rgb(204, 204, 204);
+    background-color: #eaeafa;
 }
 
 #banner-container {
