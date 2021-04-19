@@ -1,9 +1,7 @@
 # Don't write code you aren't running
 ### 16th April 2021
 
----
 > **Summary**: I've endeavoured to avoid writing code paths that I can't run in the debugger while writing them. Instead I write a lot of asserts to catch inputs that require new behaviour so that I can write it with an actual test case. Previously I'd happily write what looks correct, but I've been bitten in the past by bugs that went unnoticed for months because they were in untested code paths.
----
 
 This is a handy coding practice that's crystallised for me recently, whilst trying to convert GLTF models into my own data format. When it comes to side projects, I try to write the minimum code to see some tangible progress and build from there in straightforward steps. This way I always know what to work on next, and it minimises the time between minor victories that make the process fun and rewarding.
 
