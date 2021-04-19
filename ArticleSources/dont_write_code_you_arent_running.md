@@ -1,5 +1,5 @@
 # Don't write code you aren't running
-### 16th April 2021
+## 16th April 2021
 
 > **Summary**: I've endeavoured to avoid writing code paths that I can't run in the debugger while writing them. Instead I write a lot of asserts to catch inputs that require new behaviour so that I can write it with an actual test case. Previously I'd happily write what looks correct, but I've been bitten in the past by bugs that went unnoticed for months because they were in untested code paths.
 

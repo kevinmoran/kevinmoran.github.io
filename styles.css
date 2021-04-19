@@ -10,8 +10,8 @@ body {
     text-align: justify;
 }
 
+h1,
 h2,
-h3,
 strong {
     color: #333;
     line-height: 1;
