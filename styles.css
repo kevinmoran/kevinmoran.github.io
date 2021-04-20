@@ -17,6 +17,14 @@ strong {
     line-height: 1;
 }
 
+a:link{
+    color: #47d;
+}
+
+a:visited{
+    color: #52c;
+}
+
 blockquote {
     padding: 0.5em 2em;
     color: #333;
