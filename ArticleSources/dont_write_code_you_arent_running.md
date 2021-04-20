@@ -1,9 +1,9 @@
 # Don't write code you aren't running
 ## 20th April 2021
 
-> **Summary**: I've started trying to avoid writing code paths before I have a concrete test case for them. In the past I've had bugs surface that had gone unnoticed for months because of code that had never been executed being hit for the first time long after it was written.
+> **Summary**: This article outlines a programming strategy where I avoid writing code paths before I have a concrete test case for them. I've had bugs before where seemingly simple code I wrote without running was slightly incorrect, and these issues can be hard to uncover in months-old code.
 > 
-> I used a new approach while writing code to load 3D models from GLTF files; I would only write the code to handle input data I was actually seeing, and `assert()` on any unexpected input. This way I avoided handling features of the file format until I had a file to test it with and got a failed assertion telling me exactly what needed to be fixed.
+> My new approach is to only write the code to handle input data I am actually seeing, and `assert()` on any assumptions the code makes. This way I avoid writing code paths until I have the input to actually test them with, when I get a failed assertion telling me exactly what needs to be fixed.
 
 This is a handy coding practice that's emerged for me recently when I wanted to convert GLTF models into my own data format. When working on side projects I try to write the minimum code to see some tangible progress and build from there in straightforward steps. This way I always know what to work on next, and it minimises the time between minor victories that make the process fun and rewarding.
 
@@ -23,6 +23,25 @@ Once my code could successfully load file 1, I tried loading file 2 with it. Whe
 
 This code is far from complete, but now if I ever try to load a model with it which I don't handle correctly, it will immediately crash and I'll get an exact reason why, which is crucial if this happens days, weeks or months from now. The assertions will direct me to the place in the code that needs to be looked at, and most importantly I'll know my solution is working since I have a failing test case to verify it with.
 
-That's not to say that I would write model-loading code for a game engine team that crashes on the artists' machines all the time. Rather you should be getting as much test data as possible up-front rather than waiting for failure "in the wild". The important thing is to be guided by actual input data for the problem at hand.
+As a quick example, here's a snippet from my GLTF conversion code:
 
-This approach is probably obvious to some, but it's been a very satisfying discovery for me. It simplifies the problem-solving process and allows the code to grow fluidly and robustly. As Mike Acton says, all code does is transform data. Letting the data guide the code only makes sense.
+```cpp
+auto& accessor = model.accessors[skin.inverseBindMatrices];
+assert(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+assert(accessor.type == TINYGLTF_TYPE_MAT4);
+assert(accessor.byteOffset == 0);
+assert(accessor.bufferView >= 0);
+
+auto& invBindPoseBuffView = model.bufferViews[accessor.bufferView];
+assert(invBindPoseBuffView.byteStride == 0);
+assert(invBindPoseBuffView.buffer >= 0);
+
+auto& invBindPoseBuffer = model.buffers[invBindPoseBuffView.buffer];
+mat4* invBindPoseMats = (mat4*)(&invBindPoseBuffer.data[invBindPoseBuffView.byteOffset]);
+```
+
+Based on my understanding of the GLTF spec, if `accessor.byteOffset` is nonzero then I believe it should be added to `invBindPoseBuffView.byteOffset` on the last line when fetching the inverse bind pose matrices from the buffer. But I'm happy to leave that assertion in there and verify that my understanding is correct when I actually have a file in which this is the case. I have yet to see one!
+
+This is not to say that I would write model-loading code for a game engine team that crashes on the artists' machines all the time. Rather you should be getting as much test data as possible up-front rather than waiting for failure "in the wild". The important thing is to be guided by actual input data for the problem at hand.
+
+This approach is probably obvious to some, but it's been a very satisfying discovery for me. It simplifies the problem-solving process and allows the code to grow fluidly and robustly. As Mike Acton says: ["The only purpose of any code is to transform data"](https://www.youtube.com/watch?v=rX0ItVEVjHc). Letting the data guide the code only makes sense.
