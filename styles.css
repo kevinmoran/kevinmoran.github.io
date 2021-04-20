@@ -20,7 +20,18 @@ strong {
 blockquote {
     padding: 0.5em 2em;
     color: #333;
-    background-color: #eaeafa;
+    background-color: #eaeaef;
+}
+
+blockquote code {
+    background-color: #f0f0f0;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+code {
+    background-color: #f0f0f0;
+    padding: 1px;
 }
 
 #banner-container {
