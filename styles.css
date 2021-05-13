@@ -10,6 +10,13 @@ body {
     text-align: justify;
 }
 
+img {
+    display:block;
+    margin:auto;
+    max-width:80%;
+    padding: 1.5em;
+}
+
 h1,
 h2,
 strong {
