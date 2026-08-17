@@ -91,13 +91,19 @@ code {
     width: 50px;
     height: 50px;
     background-size:contain; 
+    background-repeat: no-repeat;
 }
 
 #banner-twitter-link {
     background-image: url(Images/twitter.png);
-    margin-right: 50px
+    margin-right: 50px;
+}
+
+#banner-bluesky-link {
+    background-image: url(Images/bluesky.png);
+    margin-right: 50px;
 }
 
 #banner-github-link {
-    background-image: url(Images/github.png)
+    background-image: url(Images/github.png);
 }
