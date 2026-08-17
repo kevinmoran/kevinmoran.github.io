@@ -107,6 +107,10 @@ code {
     background-image: url(Images/bluesky.png);
 }
 
+#banner-mastodon-link {
+    background-image: url(Images/mastodon.svg);
+}
+
 #banner-github-link {
     background-image: url(Images/github.png);
 }
