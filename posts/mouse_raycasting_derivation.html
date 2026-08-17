@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Mouse Raycasting Derivation - Kevin's Blog</title>
+        <link rel="stylesheet" href="../styles.css">
+
+        <!-- Primary Meta Tags -->
+        <meta name="title" content="Mouse Raycasting Derivation - Kevin's Blog" />
+        <meta name="description" content="This article outlines a derivation for a simple way to cast a ray in world space through a mouse position on the screen, allowing for mouse picking, shooting gameplay, etc." />
+        <!-- Open Graph Tags -->
+        <meta property="og:title" content="Mouse Raycasting Derivation - Kevin's Blog" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://kevinmoran.github.io/posts/mouse_raycasting_derivation.html" />
+        <meta property="og:image" content="https://kevinmoran.github.io/Images/MouseRaycastingOverview.png" />
+        <meta property="og:description" content="This article outlines a derivation for a simple way to cast a ray in world space through a mouse position on the screen, allowing for mouse picking, shooting gameplay, etc." />
+        <!-- Twitter Tags -->
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:site" content="@GamedevKevin"/>
+        <meta name="twitter:title" content="Mouse Raycasting Derivation - Kevin's Blog"/>
+        <meta name="twitter:description" content="This article outlines a derivation for a simple way to cast a ray in world space through a mouse position on the screen, allowing for mouse picking, shooting gameplay, etc."/>
+        <meta name="twitter:image" content="https://kevinmoran.github.io/Images/MouseRaycastingOverview.png"/>
+        <meta name="twitter:image:alt" content="Diagram showing a ray being cast through a camera frustum based on a mouse position on the near plane, and how it relates to the camera's forward vector."/>
+    </head>
+    <body>
+        <div id="banner-container">
+            <div id="banner-background-image">
+                <a class="image-link" href="https://kevinmoran.github.io"></a>
+            </div>
+            <div id="banner-content">
+                <div id="banner-title"> Kevin's Blog </div>
+                <div id="banner-subtitle"> C/C++ programming, games, 3D graphics </div>
+                <a class="banner-social-media-link" id="banner-twitter-link" href="https://www.twitter.com/GamedevKevin"></a>
+                <a class="banner-social-media-link" id="banner-github-link" href="https://www.github.com/kevinmoran"></a>
+            </div>
+        </div>
+        <div>
+            <header>
+                <h1>Mouse Raycasting Derivation</h1>
+                <h2>17th August 2026</h2>
+            </header>
+            <blockquote>
+                <p><strong>Summary</strong>: This article outlines a derivation for a simple way to cast a ray in world space through a mouse position on the screen, allowing for mouse picking, shooting gameplay, etc.</p>
+            </blockquote>
+            <p>I read an interesting blog post outlining a very simple way to cast a ray through a given mouse position in screen space: <a href="https://themadmanshill.com/posts/02-mouse-raycasting/mouse-ray.html">Mouse Raycasting by Diego Sainz-Pardo Laso</a>. This is a very short and convenient formula compared to the mentioned alternative method of transforming a ray in projection space to world space using many matrix multiplications. The author didn't make it clear how to derive the new method used so I figured it out and will share it here.</p>
+            <p>First, a diagram of the problem space:</p>
+            <p><img src="..\Images\MouseRaycastingOverview.png" alt="Diagram showing a ray being cast through a camera frustum based on a mouse position on the near plane, and how it relates to the camera's forward vector." title="Given a mouse position on the screen, we want to use the corresponding position ton the near plane of the camera frustum to cast a ray into the scene."></p>
+            <p>For a given position on the screen (<code>Mouse Pos</code>) we want to construct a ray (<code>Mouse Ray</code>) that starts at the camera position and passes through the equivalent position on the near plane of the camera frustum. We construct a plane one unit in front of the camera that is aligned with the near plane - the point at which our <code>MouseRay</code> hits this plane can be expressed as the camera position plus the camera forward vector, along with some delta vector that we can split into a horizontal and vertical component (<code>DeltaX</code> and <code>DeltaY</code>, which are parallel to the camera's Right and Up vector respectively). If we can derive <code>DeltaX</code> and <code>DeltaY</code>, we can adjust the camera's forward vector to align with the ray cast through the mouse position, and normalise it. We can derive a calculation for these values individually. First, let's draw the scene from the top down to help find <code>DeltaX</code>:</p>
+            <p><img src="..\Images\MouseRaycastingOverheadView.png" alt="Diagram showing the ray being cast through the mouse position from the top down." title="Looking from the top down, we can see the mouse ray and camera's foward vector make up two similar triangles, so we can solve for `DeltaX` with some trigonometry."></p>
+            <p>Triangles OAB and OCD are right-triangles sharing an angle therefore their sides are in the same ratio: <code>AB/OA == CD/OC</code></p>
+            <p><code>OA</code> is 1 (the length of the camera's forward vector) and can be removed from the equation. <code>OC</code> is the distance of the frustum's near plane from the camera (specified when calculating the perspective projection matrix) which we will call <code>nearZ</code>. <code>AB</code> is our unknown <code>DeltaX</code> so all that remains is to calculate <code>CD</code>. Here's a diagram showing only that part of the problem:</p>
+            <p><img src="..\Images\MouseRaycastingNearPlaneWidthDiagram.png" alt="Diagram showing the smaller triangle from the overhead view with the angle between the camera's forward vector and the side of the frustum highlighted." title="Marking the edge of the near plane as point E gives us a known angle based on the camera's field of view."></p>
+            <p>We already have some information about the length of <code>CD</code> - the mouse position is usually given in normalised device coordinates (we'll call this value <code>MousePosNDC</code>), which go from -1 to 1 on the x- and y-axis irrespective of screen dimensions. This means we have a value of <code>CD</code> expressed as a fraction of <code>CE</code>, half the width of the frustum's near plane. We know the angle between <code>OC</code> and <code>OE</code>, it's half the camera's horizontal field of view so we can calculate <code>CE</code> and express <code>CD</code> (or <code>DeltaX</code> from the first diagram) in those terms:</p>
+            
+            <!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>tan(FovX<span style="color: #666">/2</span>)<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>CE<span style="color: #666">/</span>OC
+<span style="color: #666">=&gt;</span><span style="color: #BBB"> </span>CE<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>tan(FovX<span style="color: #666">/2</span>)
+
+CD<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>MousePosNDC.x<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>CE
+<span style="color: #666">=&gt;</span><span style="color: #BBB"> </span>DeltaX<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>MousePosNDC.x<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>tan(FovX<span style="color: #666">/2</span>)
+</pre></div>
+
+            <p>We can do the same derivation for <code>DeltaY</code> by looking at the problem from the side and using the same trigonometry:</p>
+            <p><img src="..\Images\MouseRaycastingSideView.png" alt="Diagram showing the ray being cast through the mouse position from the side." title="Looking from the side, we can see that calculating `DeltaY` is the same process as for `DeltaX`"></p>
+            <p>Following the same procedure as before we can derive <code>DeltaY</code>. The two calculations are therefore:</p>
+
+            <!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>DeltaX<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>MousePosNDC.x<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>tan(FovX<span style="color: #666">/2</span>)
+DeltaY<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>MousePosNDC.y<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>tan(FovY<span style="color: #666">/2</span>)
+</pre></div>
+
+            <p>Note that we have two different field of view angles here - in graphics programming we only ever define one and express the other with the relationship:</p>
+            
+            <!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>FovX<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>FovY<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>AspectRatio
+</pre></div>
+
+            <p>where <code>AspectRatio</code> is <code>ViewportWidth/ViewportHeight</code>. People often use <code>FovY</code> (because historically that's what old graphics APIs expected when you configured the fixed function pipeline) but if you want the field of view to be adjustable by users/designers it's better to use the much more intuitive <code>FovX</code> and convert, but either will work.</p>
+
+            <!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>FovY<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>FovX<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>AspectRatio
+</pre></div>
+
+            <p>Finally here's the pseudocode for the full process. Thanks again to Diego for the original blog post.</p>
+            
+            <!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">struct</span><span style="color: #BBB"> </span><span style="color: #00F; font-weight: bold">Ray</span>
+{
+<span style="color: #BBB">    </span>vec3<span style="color: #BBB"> </span>origin;
+<span style="color: #BBB">    </span>vec3<span style="color: #BBB"> </span>dir;
+<span style="color: #BBB">    </span><span style="color: #B00040">float</span><span style="color: #BBB"> </span>length;
+};
+
+Ray<span style="color: #BBB"> </span>getRayThroughScreenPos(
+<span style="color: #BBB">    </span>vec2<span style="color: #BBB"> </span>ndcPos,<span style="color: #BBB"> </span><span style="color: #3D7B7B; font-style: italic">// Position on screen in NDC (-1 -&gt; 1)</span>
+<span style="color: #BBB">    </span>vec3<span style="color: #BBB"> </span>camPos,<span style="color: #BBB"> </span><span style="color: #3D7B7B; font-style: italic">// Position of camera in world space</span>
+<span style="color: #BBB">    </span>vec3<span style="color: #BBB"> </span>camFwd,<span style="color: #BBB"> </span><span style="color: #3D7B7B; font-style: italic">// Forward vector of camera</span>
+<span style="color: #BBB">    </span>vec3<span style="color: #BBB"> </span>camUp,<span style="color: #BBB">  </span><span style="color: #3D7B7B; font-style: italic">// Up vector of camera</span>
+<span style="color: #BBB">    </span>vec3<span style="color: #BBB"> </span>camRight,<span style="color: #BBB"> </span><span style="color: #3D7B7B; font-style: italic">// Right vector of camera</span>
+<span style="color: #BBB">    </span><span style="color: #B00040">float</span><span style="color: #BBB"> </span>fovX,<span style="color: #BBB">   </span><span style="color: #3D7B7B; font-style: italic">// Horizontal field of view of camera (in Radians)</span>
+<span style="color: #BBB">    </span><span style="color: #B00040">float</span><span style="color: #BBB"> </span>aspectRatio
+<span style="color: #BBB">    </span>)
+{
+<span style="color: #BBB">    </span><span style="color: #B00040">float</span><span style="color: #BBB"> </span>tanHalfFov<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>tanf(<span style="color: #666">0.5f</span><span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>fovX);
+<span style="color: #BBB">    </span>vec3<span style="color: #BBB"> </span>deltaX<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>camRight<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>tanHalfFov<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>ndcPos.x;
+<span style="color: #BBB">    </span>vec3<span style="color: #BBB"> </span>deltaY<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>camUp<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>(tanHalfFov<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>aspectRatio)<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>ndcPos.y;
+<span style="color: #BBB">    </span>Ray<span style="color: #BBB"> </span>ray;
+<span style="color: #BBB">    </span>ray.origin<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>camPos;
+<span style="color: #BBB">    </span>ray.dir<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>normalise(camFwd<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>deltaX<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>deltaY);
+<span style="color: #BBB">    </span>ray.length<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">1.f</span>;
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>ray;
+}
+</pre></div>
+
+        </div>
+    </body>
+</html>
