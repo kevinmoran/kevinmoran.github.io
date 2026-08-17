@@ -85,23 +85,26 @@ code {
     margin-bottom: 10px;
 }
 
+.banner-links-container {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    height: 50px;
+}
+
 .banner-social-media-link {
     pointer-events: auto;
-    display: inline-block;
     width: 50px;
-    height: 50px;
     background-size:contain; 
     background-repeat: no-repeat;
 }
 
 #banner-twitter-link {
     background-image: url(Images/twitter.png);
-    margin-right: 50px;
 }
 
 #banner-bluesky-link {
     background-image: url(Images/bluesky.png);
-    margin-right: 50px;
 }
 
 #banner-github-link {
