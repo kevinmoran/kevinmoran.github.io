@@ -1,5 +1,5 @@
 # Mouse Raycasting Derivation
-## 17th August 2026
+## 18th August 2026
 
 > **Summary**: This article outlines a derivation for a simple way to cast a ray in world space through a mouse position on the screen, allowing for mouse picking, shooting gameplay, etc.
 
