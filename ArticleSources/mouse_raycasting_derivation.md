@@ -1,15 +1,17 @@
 # Mouse Raycasting Derivation
-## XXth August 2026
+## 17th August 2026
 
 > **Summary**: This article outlines a derivation for a simple way to cast a ray in world space through a mouse position on the screen, allowing for mouse picking, shooting gameplay, etc.
 
 I read an interesting blog post outlining a very simple way to cast a ray through a given mouse position in screen space: [Mouse Raycasting by Diego Sainz-Pardo Laso](https://themadmanshill.com/posts/02-mouse-raycasting/mouse-ray.html). This is a very short and convenient formula compared to the mentioned alternative method of transforming a ray in projection space to world space using many matrix multiplications. The author didn't make it clear how to derive the new method used so I figured it out and will share it here.
 
-First, a diagram of the problem space:
+First, a diagram of the problem - for a given position on the screen (`Mouse Pos`) we want to construct a ray (`Mouse Ray`) the starts at the camera position and passes through the equivalent position on the near plane of the camera frustum:
 
 ![Diagram showing a ray being cast through a camera frustum based on a mouse position on the near plane, and how it relates to the camera's forward vector.](../Images/MouseRaycastingOverview.png "Given a mouse position on the screen, we want to use the corresponding position on the near plane of the camera frustum to cast a ray into the scene.")
 
-For a given position on the screen (`Mouse Pos`) we want to construct a ray (`Mouse Ray`) the starts at the camera position and passes through the equivalent position on the near plane of the camera frustum. We construct a plane one unit away that is aligned with the near plane - the point at which our `MouseRay` hits this plane can be expressed as the camera position plus the camera forward vector, along with some delta vector that we can split into a horizontal and vertical component (`DeltaX` and `DeltaY`, which are parallel to the camera's Right and Up vector respectively). If we can derive `DeltaX` and `DeltaY`, we can adjust the camera's forward vector to align with the ray cast through the mouse position, and normalise it. We can derive a calculation for these values individually. First, let's draw the scene from the top down to help find `DeltaX`:
+Consider the `Camera Forward Vector` - this is a unit vector travelling from the camera position (`Camera Pos`) through the center of the frustum. At the end of this vector we construct a plane that is aligned with the near plane. Let's call the point at which `Mouse Ray` hits this plane `Hit Point`. The vector from `Camera Pos` to `Hit Point` can be expressed as `Camera Forward Vector` plus some unknown vector `Delta` that lies on the plane. If we can calculate `Delta` we can construct this vector and normalise it to get our `Mouse Ray`.
+
+To solve this problem we split `Delta` into a horizontal and vertical component (`DeltaX` and `DeltaY`, which are parallel to the camera's Right and Up vector respectively). We can derive a formula for each of these values. First, let's draw the scene from the top down to help find `DeltaX`:
 
 ![Diagram showing the ray being cast through the mouse position from the top down.](../Images/MouseRaycastingOverheadView.png "Looking from the top down, we can see the mouse ray and camera's foward vector make up two similar triangles, so we can solve for `DeltaX` with some trigonometry.")
 
@@ -51,7 +53,7 @@ where `AspectRatio` is `ViewportWidth/ViewportHeight`. People often use `FovY` (
 FovY = FovX * AspectRatio
 ```
 
-Finally here's the pseudocode for the full process. Thanks again to Diego for the original blog post.
+Finally here's the pseudocode for the full process. Note that this function works for any point on the screen (not necessarily the mouse position) so I call the point `ndcPos` instead of `mousePos`. Thanks again to Diego for the original blog post.
 
 ```cpp
 struct Ray
